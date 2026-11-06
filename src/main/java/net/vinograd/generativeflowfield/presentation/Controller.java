@@ -12,7 +12,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import net.vinograd.generativeflowfield.element.Particle;
 import net.vinograd.generativeflowfield.element.VisualVector;
+import net.vinograd.generativeflowfield.field.cosine.TrigonometricField;
 import net.vinograd.generativeflowfield.field.integrator.EulerIntegrator;
+import net.vinograd.generativeflowfield.field.integrator.RK2Integrator;
 import net.vinograd.generativeflowfield.field.vortex.PointVortex;
 import net.vinograd.generativeflowfield.field.vortex.SpiralVortex;
 import net.vinograd.generativeflowfield.math.rational.Vector2D;
@@ -60,7 +62,6 @@ public class Controller {
 
     @FXML
     private void initialize() {
-
 
         graphics = canvas.getGraphicsContext2D();
 
@@ -115,59 +116,66 @@ public class Controller {
 
     Random random = new Random();
     private void init() {
-        for (int i = 0; i < 2000; i++) {
+        for (int i = 0; i < 6000; i++) {
             particles.add(new Particle(
                     new Vector2D(random.nextInt(0, 950), random.nextInt(0, 800)),
                     new net.vinograd.generativeflowfield.element.Color(0, 0, 255),
                     5
             ));
         }
+
     }
 
+    boolean firstFrame = true;
     private void render(double dt) {
 
         double width = canvas.getWidth();
         double height = canvas.getHeight();
 
-        graphics.setFill(Color.rgb(10, 10, 12));
-
-        graphics.fillRect(
-                0,
-                0,
-                width,
-                height
-        );
+        if (firstFrame) {
+            graphics.setFill(Color.rgb(10, 10, 12));
+            graphics.fillRect(
+                    0,
+                    0,
+                    width,
+                    height
+            );
+            firstFrame = false;
+        }
 
         graphics.setFill(colorPicker.getValue());
 
         int vectorSize = 20;
 
         VisualVector visualVector = new VisualVector(vectorSize, 45);
-        PointVortex floatingField =
-                new PointVortex(width / 2, height / 2);
+        TrigonometricField field =
+                new TrigonometricField();
 
-        EulerIntegrator integrator = new EulerIntegrator();
+        RK2Integrator integrator = new RK2Integrator();
 
-        graphics.setFill(Color.WHITE);
+        graphics.setStroke(Color.WHITE);
 
+        graphics.setFill(Color.rgb(10, 10, 12, 0.015));
+        graphics.fillRect(
+                0,
+                0,
+                canvas.getWidth(),
+                canvas.getHeight()
+        );
+
+        graphics.setStroke(Color.WHITE);
         for (Particle particle : particles) {
+            Vector2D current = particle.getPosition();
+            Vector2D integrate = integrator.integrate(current, field::sample, (float) dt, 100);
 
-            Vector2D newPos = integrator.integrate(
-                    particle.getPosition(),
-                    floatingField::sample,
-                    (float) dt,
-                    1
+            graphics.strokeLine(
+                    current.getX(), current.getY(),
+                    integrate.getX(), integrate.getY()
             );
 
-            particle.updatePosition(newPos);
-
-            graphics.fillOval(
-                    newPos.getX(),
-                    newPos.getY(),
-                    particle.getRadius(),
-                    particle.getRadius()
-            );
+            particle.updatePosition(integrate);
         }
+
 //                VisualVector.VectorComponents vectorComponents = visualVector
 //                        .forVector(normalizedDirection, x, y);
 //                double xEnd = x + vectorComponents.getVectorLineEnd().getX();
