@@ -14,6 +14,6 @@ public class Line {
 
     private int thickness;
 
-    private Color color;
+    private Colour color;
 
 }

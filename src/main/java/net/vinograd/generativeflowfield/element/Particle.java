@@ -8,17 +8,17 @@ public class Particle {
 
     private Vector2D position;
 
-    private Color color;
+    private Colour color;
 
     private final double radius;
 
-    public Particle(Vector2D initialPosition, Color color, double radius) {
+    public Particle(Vector2D initialPosition, Colour color, double radius) {
         this.position = initialPosition;
         this.color = color;
         this.radius = radius;
     }
 
-    public void updateColor(Color color) {
+    public void updateColor(Colour color) {
         this.color = color;
     }
 

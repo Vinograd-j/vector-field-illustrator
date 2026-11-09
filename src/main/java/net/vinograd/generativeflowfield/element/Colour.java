@@ -3,11 +3,11 @@ package net.vinograd.generativeflowfield.element;
 import lombok.Getter;
 
 @Getter
-public class Color {
+public class Colour {
 
     private final int r, g, b;
 
-    public Color(int r, int g, int b) {
+    public Colour(int r, int g, int b) {
         validateOrThrow(r);
         validateOrThrow(g);
         validateOrThrow(b);
